@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cucumber Documentation</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        .text_editor {
+            border: none;
+            font-size: 14px;
+            font-family: arial;
+            font-weight: bold;
+            width: 100%;
+            cursor: text;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+
+            /* Position the tooltip */
+            position: absolute;
+            z-index: 1;
+            top: -5px;
+            left: 105%;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+    </style>
+</head>
+    <body>
+    <h2 style="text-align: center">
+        Validate Your Test Steps Here!!!
+    </h2>
+    <p id="hiddenItem" style="display: none">
+
+    </p>
+    <p style="text-align: center">
+        <span class="editable_text" style="font-weight: bold;">Sample Test Steps Here<br />Test Step 1<br />Test Step 2</span>
+    </p>
+    <hr />
+    <h2 style="text-align: center">
+        Command Documentation !!!
+    </h2>
+
+    <form>
+        <div class="form-group">
+            <input class="form-control form-control-lg" type="text" placeholder="Search A Command Here" onkeypress="RefreshDocumentation()">
+        </div>
+    </form>
+
+    <div class="panel-group panels" id="accordion" role="tablist" aria-multiselectable="false">
+
+    </div>
+
+
+    <script type="application/javascript">
+
+        var text, parser, xmlDoc;
+
+        text = `<CheckPatternMatched>
+        <command>
+        <value>Left Menu Navigate To "%"</value>
+        <summary>Left menu navigation for the application.</summary>
+        <description>Navigate to particular applicaiton from left menu. Right click to necessary applciation and right click and  copy path to clipboard. now paste this path in the parameter 1.</description>
+        <possibleImplementations>
+        <possibleImplementation>
+        <value>Left Menu Navigate To "%"</value>
+        <comments>generic parameter 1 which is from appication taken as copy as path</comments>
+        <avaiableImplementations>
+        <avaiableImplementation>Left Menu Navigate To "Maker/screen1"</avaiableImplementation>
+        <avaiableImplementation>Left Menu Navigate To "Maker/screen2"</avaiableImplementation>
+        <avaiableImplementation>Left Menu Navigate To "Maker/screen3"</avaiableImplementation>
+        </avaiableImplementations>
+        </possibleImplementation>
+        </possibleImplementations>
+        </command>
+        <command>
+        <value>Sample Test Steps Here</value>
+        <summary>sample summary</summary>
+        <description>this is a sample summary</description>
+        <possibleImplementations>
+        <possibleImplementation>
+        <value></value>
+        <comments></comments>
+        <avaiableImplementations>
+        <avaiableImplementation></avaiableImplementation>
+        </avaiableImplementations>
+        </possibleImplementation>
+        </possibleImplementations>
+        </command>
+        </CheckPatternMatched>`;
+
+        parser = new DOMParser();
+        xmlDoc = parser.parseFromString(text,"text/xml");
+
+        $(document).on("click", ".editable_text", function() {
+            var original_text = $(this).html().replace(/<br>/g,"||||||||||");
+            $("#hiddenItem").html(original_text);
+            original_text = $("#hiddenItem").text();
+            original_text = original_text.replace(/\|\|\|\|\|\|\|\|\|\|/g,"\n");
+            var new_input = $("<textarea class=\"text_editor\" rows=\"15\"/>");
+            new_input.val(original_text);
+            $(this).replaceWith(new_input);
+            new_input.focus();
+        });
+
+        $(document).on("blur", ".text_editor", function() {
+            var new_input = $(this).val();
+            new_input_linebyline = new_input.split("\n");
+            new_input = "";
+            $.each(new_input_linebyline, function(k){
+                var singleLineItemHTML = new_input_linebyline[k];
+                if(CheckPatternMatched(singleLineItemHTML)){
+                    singleLineItemHTML = "<span style=\"color:green;font-weight: bold;\">"+singleLineItemHTML+"</span>";
+                } else {
+                    singleLineItemHTML = "<span style=\"color:red;font-weight: bold;\">"+singleLineItemHTML+"</span>";
+                }
+                if(k == 0){
+                    new_input = singleLineItemHTML;
+                } else {
+                    new_input = new_input + "<br />" + singleLineItemHTML;
+                }
+            });
+            var updated_text = $("<span class=\"editable_text\">");
+            updated_text.html(new_input);
+            $(this).replaceWith(updated_text);
+        });
+
+        /**
+         * @return {boolean}
+         */
+        function CheckPatternMatched(stringUserInput){
+            var patternList = GetAvaiablePatternList();
+            var matched = false;
+            $.each(patternList, function(k){
+                if(PatternCompare(stringUserInput,patternList[k])){
+                    matched = true;
+                }
+            });
+            return matched;
+        }
+
+        function GetAvaiablePatternList(){
+            patternArray = [];
+            commandArray = xmlDoc.getElementsByTagName("command");
+            for(var i=0; i<xmlDoc.getElementsByTagName("command").length;i++){
+                patternArray.push(xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("value")[0].textContent);
+            }
+            console.log(patternArray);
+            return patternArray;
+            //return ["Sample Test Steps Here","Left Menu Navigate To \"%\""];
+        }
+
+        /**
+         * @return {boolean}
+         */
+        function PatternCompare(userInputString,patternToCompare){
+            patternToCompare = patternToCompare.replace(/%/g,".*");
+            var re = new RegExp(patternToCompare,"gi");
+            var matchedAray = userInputString.match(re);
+            if(matchedAray){
+                return (matchedAray.length == 1);
+            } else {
+                return false;
+            }
+        }
+
+        function RefreshDocumentation(){
+            var paneTitle = "helloww command";
+            var paneDescription = "<h3>Summary</h3>" +
+                    "<p>"+"summary of command"+"</p>" +
+                    "<h3>Description</h3>" +
+                    "<p>Description of the command</p>" +
+                    "<h3>Possible Implementations</h3>" +
+                    "<p>" +
+                    "</p>";
+
+            // Loop for Each Command
+            for(var i=0; i<xmlDoc.getElementsByTagName("command").length;i++){
+                //Reset Variables
+                var paneTitle = "";
+                var paneDescription = "<h3>Summary</h3>";
+
+                //get title of panel
+                paneTitle = xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("value")[0].textContent;
+
+                //start generating the documentation for command
+                //add summary and description for this command
+                paneDescription = paneDescription + "<p>" + xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("summary")[0].textContent + "</p>";
+                paneDescription = paneDescription + "<h3>Description</h3>";
+                paneDescription = paneDescription + "<p>" + xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("description")[0].textContent + "</p>";
+
+                //iterate over possible implementations
+                paneDescription = paneDescription + "<ul>";
+                for(var j=0; j<xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation").length;j++){
+
+                    paneDescription = paneDescription + "<li><a href=\"#\" data-toggle=\"tooltip\" title=\"" +
+                            xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("comments")[0].textContent+
+                            "\">"+
+                            xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("value")[0].textContent+
+                            "</a>";
+
+                    //iterate over available implementations of this possible implementation
+                    paneDescription = paneDescription + "<ul>";
+                    for(var k=0; k<xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("avaiableImplementations")[0].getElementsByTagName("avaiableImplementation").length;k++){
+                        paneDescription = paneDescription + "<li>"+xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("avaiableImplementations")[0].getElementsByTagName("avaiableImplementation")[k].textContent;
+                        paneDescription = paneDescription + "</li>";
+                    }
+                    paneDescription = paneDescription + "</ul>";
+
+                    paneDescription = paneDescription + "</li>";
+                }
+                paneDescription = paneDescription + "</ul>";
+
+                //call the function to generate panel for this command
+                $('.panels').append(GetPanelHTMLItem(paneTitle,paneDescription) );
+            }
+        }
+
+        /**
+         * @return {string}
+         */
+        function GetPanelHTMLItem(panelTitle,panelDescription){
+            var x = $('.panels .panel').length+1;
+
+            var template = '<div class="panel panel-primary">';
+
+            //Title
+            template += '<div class="panel-heading" role="tab">';
+            template += '<h4 class="panel-title">';
+            template += '<a data-toggle="collapse" href="#' + x + '" aria-expanded="false" aria-controls="collapseOne"  data-parent="#accordion">' + x + ' : ' + panelTitle + '</a>';
+            template += '</h4></div>';
+            template += '<div id="' + x + '" class="panel-collapse collapse" role="tabpanel"><div class="panel-body">';
+
+            // Description
+            template += '<div class="row">';
+            template += '<div class="col-md-12">';
+            template += panelDescription;
+
+            template += '</div></div>';
+
+            // Close open tags
+            template += '</div></div></div>';
+            return template;
+        }
+
+    </script>
+    </body>
+</html>
