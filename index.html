@@ -25,6 +25,7 @@
             font-weight: bold;
             width: 100%;
             cursor: text;
+            text-align: center;
         }
         .tooltip {
             position: relative;
@@ -60,8 +61,8 @@
     <p id="hiddenItem" style="display: none">
 
     </p>
-    <p style="text-align: center">
-        <span class="editable_text" style="font-weight: bold;">Sample Test Steps Here<br />Test Step 1<br />Test Step 2</span>
+    <p>
+        <p class="editable_text" style="font-weight: bold;text-align: center">Sample Test Steps Here<br />Test Step 1<br />Test Step 2</p>
     </p>
     <hr />
     <h2 style="text-align: center">
@@ -70,7 +71,7 @@
 
     <form>
         <div class="form-group">
-            <input class="form-control form-control-lg" type="text" placeholder="Search A Command Here" onkeypress="RefreshDocumentation()">
+            <input class="form-control form-control-lg" type="text" placeholder="Search A Command Here" onkeyup="RefreshDocumentation(this.value)">
         </div>
     </form>
 
@@ -147,7 +148,7 @@
                     new_input = new_input + "<br />" + singleLineItemHTML;
                 }
             });
-            var updated_text = $("<span class=\"editable_text\">");
+            var updated_text = $("<p class=\"editable_text\" style=\"font-weight: bold;text-align: center\">");
             updated_text.html(new_input);
             $(this).replaceWith(updated_text);
         });
@@ -172,7 +173,6 @@
             for(var i=0; i<xmlDoc.getElementsByTagName("command").length;i++){
                 patternArray.push(xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("value")[0].textContent);
             }
-            console.log(patternArray);
             return patternArray;
             //return ["Sample Test Steps Here","Left Menu Navigate To \"%\""];
         }
@@ -181,25 +181,20 @@
          * @return {boolean}
          */
         function PatternCompare(userInputString,patternToCompare){
-            patternToCompare = patternToCompare.replace(/%/g,".*");
+            patternToCompare = patternToCompare.replace(/%/g,".*?");
             var re = new RegExp(patternToCompare,"gi");
             var matchedAray = userInputString.match(re);
             if(matchedAray){
-                return (matchedAray.length == 1);
+                return (matchedAray.length == 1 && matchedAray[0].length == userInputString.length);
             } else {
                 return false;
             }
         }
 
-        function RefreshDocumentation(){
-            var paneTitle = "helloww command";
-            var paneDescription = "<h3>Summary</h3>" +
-                    "<p>"+"summary of command"+"</p>" +
-                    "<h3>Description</h3>" +
-                    "<p>Description of the command</p>" +
-                    "<h3>Possible Implementations</h3>" +
-                    "<p>" +
-                    "</p>";
+        function RefreshDocumentation(searchString){
+
+            //clear the documentation
+            $("#accordion").html("");
 
             // Loop for Each Command
             for(var i=0; i<xmlDoc.getElementsByTagName("command").length;i++){
@@ -209,6 +204,11 @@
 
                 //get title of panel
                 paneTitle = xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("value")[0].textContent;
+
+                if (paneTitle.toLowerCase().indexOf(searchString.toLowerCase()) < 0) {
+                    //searchString is not available in commnad. do not add this
+                    continue;
+                }
 
                 //start generating the documentation for command
                 //add summary and description for this command
@@ -269,6 +269,10 @@
             template += '</div></div></div>';
             return template;
         }
+
+        $(document).ready(function(){
+            RefreshDocumentation("");
+        });
 
     </script>
     </body>
