@@ -212,11 +212,11 @@
                     paneDescription = paneDescription + "<ul>";
                     for (var j = 0; j < xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation").length; j++) {
 
-                        paneDescription = paneDescription + "<li><a href=\"#\" data-toggle=\"tooltip\" title=\"" +
+                        paneDescription = paneDescription + "<li><details><summary><span style='text-decoration:underline;text-decoration-color: blue;color: blue;cursor: pointer' title=\"" +
                                 xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("comments")[0].textContent +
                                 "\">" +
                                 xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("value")[0].textContent +
-                                "</a>";
+                                "</span></summary>";
 
                         //iterate over available implementations of this possible implementation
                         if(xmlDoc.getElementsByTagName("command")[i].getElementsByTagName("possibleImplementations")[0].getElementsByTagName("possibleImplementation")[j].getElementsByTagName("avaiableImplementations")[0]) {
@@ -228,7 +228,7 @@
                             paneDescription = paneDescription + "</ul>";
 
                         }
-                        paneDescription = paneDescription + "</li>";
+                        paneDescription = paneDescription + "</details></li>";
                     }
                     paneDescription = paneDescription + "</ul>";
                 }
